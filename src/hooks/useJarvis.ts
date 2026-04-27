@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { LogEntry, LogKind, Status } from "../lib/types";
 import { parseCommand } from "../lib/intent";
-import { openApp, runRoutine } from "../lib/commands";
+import { openApp, runRoutine, transcribe } from "../lib/commands";
 import { useMic } from "./useMic";
 
 const LOG_LIMIT = 30;
@@ -19,9 +19,26 @@ export function useJarvis() {
     );
   }
 
-  const mic = useMic((blob) => {
+  const mic = useMic(async (blob) => {
+    if (blob.size === 0) {
+      setStatus("idle");
+      return;
+    }
+    setStatus("processing");
     const kb = Math.round(blob.size / 1024);
-    push("system", `Audio capturado (${kb} KB) — pendiente STT`);
+    push("system", `Audio capturado (${kb} KB) — transcribiendo...`);
+    try {
+      const text = await transcribe(blob);
+      if (!text) {
+        push("system", "No se detectó voz");
+        setStatus("idle");
+        return;
+      }
+      await dispatch(text);
+    } catch (e) {
+      setStatus("error");
+      push("error", `STT: ${String(e)}`);
+    }
   });
 
   async function start() {
@@ -37,7 +54,6 @@ export function useJarvis() {
 
   function stop() {
     mic.stop();
-    setStatus("idle");
   }
 
   async function dispatch(transcript: string) {
