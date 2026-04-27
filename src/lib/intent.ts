@@ -11,7 +11,5 @@ export function parseCommand(transcript: string): Parsed {
   for (const [kw, routine] of Object.entries(ROUTINE_KEYWORDS)) {
     if (t.includes(kw)) return { type: "routine", payload: routine };
   }
-  const m = t.match(/^abrir\s+(.+)$/);
-  if (m) return { type: "open", payload: m[1].trim() };
   return { type: "none" };
 }

@@ -1,34 +1,9 @@
-use serde::Serialize;
 use std::process::Command;
-
-#[derive(Serialize)]
-struct CommandResult {
-    success: bool,
-    message: String,
-}
-
-#[tauri::command]
-fn open_app(name: String) -> Result<CommandResult, String> {
-    let output = Command::new("open")
-        .arg("-a")
-        .arg(&name)
-        .output()
-        .map_err(|e| format!("No pude ejecutar 'open': {e}"))?;
-
-    if output.status.success() {
-        Ok(CommandResult {
-            success: true,
-            message: format!("Abriendo {name}"),
-        })
-    } else {
-        Err(String::from_utf8_lossy(&output.stderr).trim().to_string())
-    }
-}
 
 #[tauri::command]
 fn run_routine(name: String) -> Result<Vec<String>, String> {
     let apps: Vec<&str> = match name.as_str() {
-        "comenzar-dia" => vec!["Google Chrome", "Cursor", "Slack"],
+        "comenzar-dia" => vec!["Google Chrome", "Cursor", "Slack", "Ghostty"],
         "modo-estudio" => vec!["Preview", "Music"],
         other => return Err(format!("Rutina desconocida: {other}")),
     };
@@ -90,7 +65,7 @@ pub fn run() {
     let _ = dotenvy::dotenv();
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![open_app, run_routine, transcribe])
+        .invoke_handler(tauri::generate_handler![run_routine, transcribe])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

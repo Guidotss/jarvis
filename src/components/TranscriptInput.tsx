@@ -15,7 +15,7 @@ export function TranscriptInput({ onSubmit }: Props) {
       <input
         value={value}
         onChange={(e) => setValue(e.target.value)}
-        placeholder='"comenzar el día" · "abrir Slack" · "modo estudio"'
+        placeholder='"comenzar el día" · "modo estudio"'
         onKeyDown={(e) => {
           if (e.key === "Enter") {
             onSubmit(value);

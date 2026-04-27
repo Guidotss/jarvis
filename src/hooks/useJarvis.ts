@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { LogEntry, LogKind, Status } from "../lib/types";
 import { parseCommand } from "../lib/intent";
-import { openApp, runRoutine, transcribe } from "../lib/commands";
+import { runRoutine, transcribe } from "../lib/commands";
 import { useMic } from "./useMic";
 
 const LOG_LIMIT = 30;
@@ -65,9 +65,6 @@ export function useJarvis() {
       if (parsed.type === "routine") {
         const apps = await runRoutine(parsed.payload);
         push("success", `Rutina ${parsed.payload}: ${apps.join(", ")}`);
-      } else if (parsed.type === "open") {
-        const res = await openApp(parsed.payload);
-        push("success", res.message);
       } else {
         push("system", "No entendí el comando");
       }
